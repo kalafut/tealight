@@ -69,15 +69,27 @@ def add(task):
     TODOS.write_file()
 
 @cli.command()
+def addm():
+    while True:
+        line = raw_input()
+        if not line:
+            break
+        todo = Todo(line, prepend_date=True)
+        TODOS.add(todo)
+        TODOS.write_file()
+
+@cli.command()
 @click.argument('search', default='')
 def ls(search):
     TODOS.report(search=search)
 
 @cli.command()
-@click.argument('id')
-def rm(id):
-    TODOS.todos.pop(int(id)-1)
-    TODOS.write_file()
+@click.argument('ids', nargs=-1)
+def rm(ids):
+    ids = sorted(list(ids), reverse=True)
+    for id in ids:
+        TODOS.todos.pop(int(id)-1)
+        TODOS.write_file()
 
 @cli.command()
 @click.argument('id')
