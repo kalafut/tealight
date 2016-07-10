@@ -6,26 +6,29 @@ import os
 TODO_DIR = os.path.expanduser('~/Dropbox/todo')
 TODO_FILE = os.path.join(TODO_DIR, 'todo.txt')
 
-
 class Todo:
     def __init__(self, line, prepend_date=False):
         self.text = ''
+        self.done = False
         self.valid = self.parse_line(line)
         if prepend_date:
             self.text = '{} {}'.format(arrow.now().format('YYYY-MM-DD'), self.text)
 
     def parse_line(self, line):
-        self.text = line.strip()
+        line = line.strip()
+        if line.startswith('x '):
+            self.done = True
+            line = line[2:].strip()
+        self.text = line
         return True
 
+    def render(self):
+        if self.done:
+            return 'x ' + self.text
+        else:
+            return self.text
+
 class TodoFile:
-    todo = None
-
-    @classmethod
-    def init(cls):
-        if not cls.todo:
-            cls.todo = TodoFile(TODO_FILE)
-
     def __init__(self, name):
         self.name = name
         self.todos = []
@@ -41,17 +44,17 @@ class TodoFile:
     def write_file(self):
         with open(self.name, 'w') as f:
             for todo in self.todos:
-                f.write(todo.text + '\n')
+                f.write(todo.render() + '\n')
 
     def add(self, todo):
         self.todos.append(todo)
 
-    def report(self):
+    def report(self, search=''):
         line = 1
         for todo in self.todos:
-            print '{} {}'.format(line, todo.text)
+            if search in todo.text and not todo.done:
+                print '{} {}'.format(line, todo.render())
             line += 1
-
         print
 
 @click.group()
@@ -62,20 +65,28 @@ def cli():
 @click.argument('task', nargs=-1)
 def add(task):
     todo = Todo(' '.join(task), prepend_date=True)
-    TodoFile.todo.add(todo)
-    TodoFile.todo.write_file()
+    TODOS.add(todo)
+    TODOS.write_file()
 
 @cli.command()
-def ls():
-    TodoFile.todo.report()
+@click.argument('search', default='')
+def ls(search):
+    TODOS.report(search=search)
 
 @cli.command()
 @click.argument('id')
 def rm(id):
-    TodoFile.todo.todos.pop(int(id)-1)
-    TodoFile.todo.write_file()
+    TODOS.todos.pop(int(id)-1)
+    TODOS.write_file()
+
+@cli.command()
+@click.argument('id')
+def do(id):
+    TODOS.todos[int(id)-1].done = True
+    TODOS.write_file()
+
+TODOS = TodoFile(TODO_FILE)
 
 if __name__ == '__main__':
-    TodoFile.init()
     cli()
 
