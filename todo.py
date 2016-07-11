@@ -2,9 +2,13 @@
 import arrow
 import click
 import os
+import re
 
 TODO_DIR = os.path.expanduser('~/Dropbox/todo')
 TODO_FILE = os.path.join(TODO_DIR, 'todo.txt')
+
+#https://regex101.com/r/fR0dN9/1
+TODO_RE = re.compile(r'^(x +)?(\([A-Z]\))? +(\d{4}-\d\d-\d\d)? +(\d{4}-\d\d-\d\d)? *(.*)')
 
 class dotdict(dict):
     """Make for less verbose dict syntax"""
@@ -91,7 +95,7 @@ class TodoFile:
                 f.write(todo.render() + '\n')
 
     def add(self, todo):
-        self.todos.append(todo)
+        self.todos.insert(0, todo)
 
     def report(self, search=''):
         line = 1
