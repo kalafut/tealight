@@ -7,9 +7,30 @@ TODO_DIR = os.path.expanduser('~/Dropbox/todo')
 TODO_FILE = os.path.join(TODO_DIR, 'todo.txt')
 
 class dotdict(dict):
+    """Make for less verbose dict syntax"""
     __getattr__ = dict.__getitem__
     __setattr__ = dict.__setitem__
     __delattr__ = dict.__delitem__
+
+# Basic data structures
+
+def parse_file(name):
+    todos = []
+    with open(name) as f:
+        for line in f:
+            todos.append(parse_line(line))
+    return todos
+
+def write_file(name, todos):
+    with open(name, 'w') as f:
+        for todo in todos:
+            f.write(render_string(todo) + '\n')
+
+def render_string(todo):
+    if todo.done:
+        return 'x ' + todo.text
+    else:
+        return todo.text
 
 def parse_line(line):
     line = line.strip()
@@ -20,6 +41,14 @@ def parse_line(line):
         done = False
 
     return dotdict({ 'text': line, 'done': done })
+
+def print_report(todos, search=''):
+    line = 1
+    for todo in todos:
+        if search in todo.text and not todo.done:
+            print '{} {}'.format(line, render_string(todo))
+        line += 1
+    print
 
 class Todo:
     def __init__(self, line, prepend_date=False):
@@ -96,7 +125,7 @@ def addm():
 @cli.command()
 @click.argument('search', default='')
 def ls(search):
-    TODOS.report(search=search)
+    print_report(TODOS2, search)
 
 @cli.command()
 @click.argument('ids', nargs=-1)
@@ -113,6 +142,7 @@ def do(id):
     TODOS.write_file()
 
 TODOS = TodoFile(TODO_FILE)
+TODOS2 = parse_file(TODO_FILE)
 
 if __name__ == '__main__':
     cli()
