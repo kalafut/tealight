@@ -6,6 +6,21 @@ import os
 TODO_DIR = os.path.expanduser('~/Dropbox/todo')
 TODO_FILE = os.path.join(TODO_DIR, 'todo.txt')
 
+class dotdict(dict):
+    __getattr__ = dict.__getitem__
+    __setattr__ = dict.__setitem__
+    __delattr__ = dict.__delitem__
+
+def parse_line(line):
+    line = line.strip()
+    if line.startswith('x '):
+        done = True
+        line = line[2:].strip()
+    else:
+        done = False
+
+    return dotdict({ 'text': line, 'done': done })
+
 class Todo:
     def __init__(self, line, prepend_date=False):
         self.text = ''
