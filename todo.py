@@ -7,8 +7,8 @@ import re
 TODO_DIR = os.path.expanduser('~/Dropbox/todo')
 TODO_FILE = os.path.join(TODO_DIR, 'todo.txt')
 
-#https://regex101.com/r/fR0dN9/1
-TODO_RE = re.compile(r'^(x +)?(\([A-Z]\))? +(\d{4}-\d\d-\d\d)? +(\d{4}-\d\d-\d\d)? *(.*)')
+#https://regex101.com/r/fR0dN9/3
+TODO_LEGACY_RE = re.compile(r'^(?P<done>x +)?(?P<priority>\([A-Z]\) +)?(?P<created>\d{4}-\d\d-\d\d +)?(?P<completed>\d{4}-\d\d-\d\d)? *(?P<text>.*?) *$')
 
 class dotdict(dict):
     """Make for less verbose dict syntax"""
@@ -37,14 +37,16 @@ def render_string(todo):
         return todo.text
 
 def parse_line(line):
-    line = line.strip()
-    if line.startswith('x '):
-        done = True
-        line = line[2:].strip()
-    else:
-        done = False
+    m = TODO_LEGACY_RE.match(line)
+    vals = dotdict(m.groupdict())
+    for k, v in vals.items():
+        if v:
+            vals[k] = v.strip()
 
-    return dotdict({ 'text': line, 'done': done })
+    return dotdict({
+        'done': vals.done == 'x',
+        'text': vals.text
+        })
 
 def print_report(todos, search=''):
     line = 1
@@ -145,9 +147,9 @@ def do(id):
     TODOS.todos[int(id)-1].done = True
     TODOS.write_file()
 
-TODOS = TodoFile(TODO_FILE)
-TODOS2 = parse_file(TODO_FILE)
-
 if __name__ == '__main__':
+    TODOS = TodoFile(TODO_FILE)
+    TODOS2 = parse_file(TODO_FILE)
+
     cli()
 
