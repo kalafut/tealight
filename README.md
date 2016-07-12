@@ -14,3 +14,5 @@ notes
 inline configuration 
 no contexts https://www.omnigroup.com/video/set/the-omnifocus-setup-2013/a-fresh-take-on-contexts/
 explicit and calculated priority/importance/urgency
+ages instead of dates for begin and end, to reduce visual clutter
+attractive alignment 
