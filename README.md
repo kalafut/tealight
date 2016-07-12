@@ -1,4 +1,9 @@
-# tealight
+# To Be Named
+Almost nothing is done yet. This is a todo list for building a todo list app.
+
+## Motivation
+
+## Features
 
 - fluent dates
 - clutter at the end
@@ -16,3 +21,6 @@
 - explicit and calculated priority/importance/urgency
 - ages instead of dates for begin and end, to reduce visual clutter
 - attractive alignment 
+
+
+### Format
