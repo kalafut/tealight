@@ -4,8 +4,19 @@ import click
 import os
 import re
 
+class ParseError(Exception):
+    pass
+
+TODAY = arrow.get(arrow.now().format('YYYY-MM-DD'), 'YYYY-MM-DD')
 TODO_DIR = os.path.expanduser('~/Dropbox/todo')
 TODO_FILE = os.path.join(TODO_DIR, 'todo.txt')
+
+PRIORITY_MAP = {
+    'A': 90,
+    'B': 80,
+    'C': 70,
+    None: 50,
+    }
 
 #https://regex101.com/r/fR0dN9/3
 TODO_LEGACY_RE = re.compile(r'^(?P<done>x +)?(?P<priority>\([A-Z]\) +)?(?P<created>\d{4}-\d\d-\d\d +)?(?P<completed>\d{4}-\d\d-\d\d)? *(?P<text>.*?) *$')
@@ -38,14 +49,24 @@ def render_string(todo):
 
 def parse_line(line):
     m = TODO_LEGACY_RE.match(line)
+    if not m:
+        raise ParseError()
+
     vals = dotdict(m.groupdict())
     for k, v in vals.items():
         if v:
             vals[k] = v.strip()
+            if k == 'priority':
+                vals[k] = v[1]
+
+    priority = PRIORITY_MAP[vals.priority]
 
     return dotdict({
         'done': vals.done == 'x',
-        'text': vals.text
+        'text': vals.text,
+        'created': arrow.get(vals.created, 'YYYY-MM-DD') if vals.created else TODAY,
+        'completed': arrow.get(vals.completed, 'YYYY-MM-DD') if vals.completed else None,
+        'priority': priority,
         })
 
 def print_report(todos, search=''):
