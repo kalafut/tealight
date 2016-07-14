@@ -22,5 +22,20 @@ Almost nothing is done yet. This is a todo list for building a todo list app.
 - ages instead of dates for begin and end, to reduce visual clutter
 - attractive alignment 
 
+### Sorting
+
+- flag
+- priority
+- order in project
+- order in file
+
+### Priority
+Priority is the first applicable criterion from:
+
+1. If the task/project is a blocker, priority is the max of all blocked tasks/projects + 1
+2. Specified priority
+3. Parent's priority
+4. Default (50)
 
 ### Format
+
