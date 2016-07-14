@@ -74,12 +74,16 @@ class Todo:
         else:
             return todo.text
 
-def print_report(todos, search=''):
+def print_report(todos, search='', all=False):
+    LIMIT = 20
+
     line = 1
     for todo in todos.todos:
         if search in todo.text and not todo.done:
             print '{} {}'.format(line, render_string(todo))
         line += 1
+        if not all and line > LIMIT:
+            break
     print
 
 class TodoFile:
@@ -133,8 +137,9 @@ def addm():
 
 @cli.command()
 @click.argument('search', default='')
-def ls(search):
-    print_report(TODOS, search)
+@click.option('--all', is_flag=True)
+def ls(search, all):
+    print_report(TODOS, search, all)
 
 @cli.command()
 @click.argument('ids', nargs=-1)
@@ -152,6 +157,5 @@ def do(id):
 
 if __name__ == '__main__':
     TODOS = TodoFile(TODO_FILE)
-    #TODOS2 = parse_file(TODO_FILE)
 
     cli()
