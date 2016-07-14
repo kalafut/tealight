@@ -3,6 +3,8 @@ import arrow
 import click
 import os
 import re
+from subprocess import call
+import tempfile
 
 class ParseError(Exception):
     pass
@@ -114,9 +116,28 @@ class TodoFile:
             line += 1
         print
 
+def do_edit(line):
+    EDITOR = os.environ.get('EDITOR', 'vim')
+    with tempfile.NamedTemporaryFile(suffix='.tmp') as tf:
+        tf.write(line + '\n')
+        tf.flush()
+        call([EDITOR, tf.name])
+
+        tf.seek(0)
+        edited_message = tf.read()
+        return edited_message
+
 @click.group()
 def cli():
     pass
+
+
+@cli.command()
+@click.argument('line')
+def edit(line):
+    line = int(line) - 1
+    TODOS.todos[line].text = do_edit(TODOS.todos[line].text).strip()
+    TODOS.write_file()
 
 @cli.command()
 @click.argument('task', nargs=-1)
